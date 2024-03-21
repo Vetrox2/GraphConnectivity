@@ -1,25 +1,22 @@
-﻿
-using System.Runtime.Intrinsics.Arm;
-
-int n = 8;
-float p = 0.2f;
-var T = new List<int>();
-var grafy = new List<List<int>>();
+﻿int VerticlesCount = 12;
+float EdgePossibility = 0.2f;
+var AvailableVerticles = new List<int>();
+var Graphs = new List<List<int>>();
 
 do
 {
-    grafy.Clear();
+    Graphs.Clear();
     Console.Clear();
-    int[,] A = new int[n, n];
-    for (int i = 0; i < n; i++)
-        T.Add(i + 1);
-    for (int i = 0; i < n - 1; i++)
+    int[,] A = new int[VerticlesCount, VerticlesCount];
+    for (int i = 0; i < VerticlesCount; i++)
+        AvailableVerticles.Add(i);
+    for (int i = 0; i < VerticlesCount - 1; i++)
     {
-        for (int j = i + 1; j < n; j++)
+        for (int j = i + 1; j < VerticlesCount; j++)
         {
             Random r = new();
             double x = r.NextDouble();
-            if (x < p)
+            if (x < EdgePossibility)
             {
                 A[i, j] = 1;
                 A[j, i] = 1;
@@ -31,26 +28,27 @@ do
     do
     {
         var graf1 = new List<int>();
-        Wszerz(T[0] - 1, n, A, graf1);
+        Wszerz(AvailableVerticles[0], VerticlesCount, A, graf1);
         WypiszGraf(graf1);
-        WypiszMacierz(A);
-        graf1.ForEach(x => T.Remove(x));
-        grafy.Add(graf1);
+        graf1.ForEach(x => AvailableVerticles.Remove(x));
+        Graphs.Add(graf1);
     }
-    while (T.Count > 0);
+    while (AvailableVerticles.Count > 0);
 }
-while (grafy.Count < 3);
+while ((Graphs.Count < 3 || Graphs.Count>5) || !Graphs.All(graf => graf.Count > 1));
+
+
 void WypiszMacierz(int[,] A)
 {
     Console.Write("   ");
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < VerticlesCount; i++)
         Console.Write(i + 1 + " ");
 
     Console.WriteLine();
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < VerticlesCount; i++)
     {
         Console.Write(i + 1 + ": ");
-        for (int j = 0; j < n; j++)
+        for (int j = 0; j < VerticlesCount; j++)
             if (i != j)
                 Console.Write(A[i, j] + " ");
             else
@@ -63,15 +61,15 @@ void WypiszMacierz(int[,] A)
 void WypiszGraf(List<int> graf)
 {
     Console.WriteLine("Graf: ");
-    graf.ForEach(x => Console.Write(x + " "));
+    graf.ForEach(x => Console.Write(x+1 + " "));
     Console.WriteLine();
 }
 void Wszerz(int i, int n, int[,] A, List<int> graf)
 {
-    graf.Add(i + 1);
-    for (int j = 0; j < n; j++)//wracam do tego samego wierzcholka kilka razys
+    graf.Add(i);
+    for (int j = 0; j < n; j++)
     {
-        if (A[i, j] == 1)
+        if (A[i, j] == 1 && !graf.Any(w => w==j))
         {
             A[i, j] = 0;
             A[j, i] = 0;
