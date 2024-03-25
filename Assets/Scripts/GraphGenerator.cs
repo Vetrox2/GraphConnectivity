@@ -1,67 +1,69 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 class GraphGenerator
 {
-    int VerticlesCount = 12;
+    int VertexCount = 12;
     float EdgePossibility = 0.2f;
+    int NumberOfDisconnectedGraphs = 3;
+    int GraphMinimalVertex = 2;
     List<int> AvailableVerticles = new();
     List<List<int>> Graphs = new();
-
     //Move commented logic to other functions!
     public int[,] GenerateGraph()
     {
-
-
-        //do
-        //{
+        int[,] B;
+        int iterations = 0;
+        do
+        {
+            iterations++;
             Graphs.Clear();
-            Console.Clear();
-            int[,] A = new int[VerticlesCount, VerticlesCount];
-            for (int i = 0; i < VerticlesCount; i++)
+            int[,] A = new int[VertexCount, VertexCount];
+            for (int i = 0; i < VertexCount; i++)
                 AvailableVerticles.Add(i);
-            for (int i = 0; i < VerticlesCount - 1; i++)
+            for (int i = 0; i < VertexCount - 1; i++)
             {
-                for (int j = i + 1; j < VerticlesCount; j++)
+                for (int j = i + 1; j < VertexCount; j++)
                 {
-                    Random r = new();
-                    double x = r.NextDouble();
+                    float x = UnityEngine.Random.Range(0.0f, 1f);
                     if (x < EdgePossibility)
                     {
                         A[i, j] = 1;
                         A[j, i] = 1;
                     }
                 }
-
             }
-            return A;
-            //WypiszMacierz(A);
-        //    do
-        //    {
-        //        var graf1 = new List<int>();
-        //        Wszerz(AvailableVerticles[0], VerticlesCount, A, graf1);
-        //        WypiszGraf(graf1);
-        //        graf1.ForEach(x => AvailableVerticles.Remove(x));
-        //        Graphs.Add(graf1);
-        //    }
-        //    while (AvailableVerticles.Count > 0);
-        //}
-        //while ((Graphs.Count < 3 || Graphs.Count > 5) || !Graphs.All(graf => graf.Count > 1));
+            B = Copy2DArray(A);
+            do
+            {
+                var graf1 = new List<int>();
+                Wszerz(AvailableVerticles[0], VertexCount, A, graf1);
+                WypiszGraf(graf1);
+                graf1.ForEach(x => AvailableVerticles.Remove(x));
+                Graphs.Add(graf1);
+            }
+            while (AvailableVerticles.Count > 0);
+        }
+        while ((Graphs.Count < NumberOfDisconnectedGraphs) 
+        || !Graphs.All(graf => graf.Count >= GraphMinimalVertex));
+        Debug.Log(iterations);
+        return B;
     }
 
 
     void WypiszMacierz(int[,] A)
     {
         Console.Write("   ");
-        for (int i = 0; i < VerticlesCount; i++)
+        for (int i = 0; i < VertexCount; i++)
             Console.Write(i + 1 + " ");
 
         Console.WriteLine();
-        for (int i = 0; i < VerticlesCount; i++)
+        for (int i = 0; i < VertexCount; i++)
         {
             Console.Write(i + 1 + ": ");
-            for (int j = 0; j < VerticlesCount; j++)
+            for (int j = 0; j < VertexCount; j++)
                 if (i != j)
                     Console.Write(A[i, j] + " ");
                 else
@@ -92,5 +94,13 @@ class GraphGenerator
             }
 
         }
+    }
+    int[,] Copy2DArray(int[,] A)
+    {
+        var B = new int[A.GetLength(0),A.GetLength(1)];
+        for (int i = 0; i < B.GetLength(0); i++)
+            for (int j = 0; j < B.GetLength(1); j++) 
+                B[i, j] = A[i, j];
+        return B;
     }
 }
