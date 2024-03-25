@@ -7,18 +7,31 @@ class GraphGenerator
 {
     int VertexCount = 12;
     float EdgePossibility = 0.2f;
-    int NumberOfDisconnectedGraphs = 3;
-    int GraphMinimalVertex = 2;
+    int MinimalSubgraphCount = 3;
+    int MinimalSubgraphSize = 2;
     List<int> AvailableVerticles = new();
     List<List<int>> Graphs = new();
     //Move commented logic to other functions!
-    public int[,] GenerateGraph()
+    public GraphGenerator(int vertexCount, float edgePossibility, int minimalSubgraphCount, int minimalSubgraphSize)
+    {
+        VertexCount = vertexCount;
+        EdgePossibility = edgePossibility;
+        MinimalSubgraphCount = minimalSubgraphCount;
+        MinimalSubgraphSize = minimalSubgraphSize;
+    }
+    public int[,]? GenerateGraph()
     {
         int[,] B;
         int iterations = 0;
+
         do
         {
             iterations++;
+            if (iterations > 1000)
+            {
+                Debug.LogError("Exceeded generator iterations limit (more than 1000 iterations)");
+                return null;
+            }
             Graphs.Clear();
             int[,] A = new int[VertexCount, VertexCount];
             for (int i = 0; i < VertexCount; i++)
@@ -46,8 +59,8 @@ class GraphGenerator
             }
             while (AvailableVerticles.Count > 0);
         }
-        while ((Graphs.Count < NumberOfDisconnectedGraphs) 
-        || !Graphs.All(graf => graf.Count >= GraphMinimalVertex));
+        while ((Graphs.Count < MinimalSubgraphCount) 
+        || !Graphs.All(graf => graf.Count >= MinimalSubgraphSize));
         Debug.Log(iterations);
         return B;
     }
