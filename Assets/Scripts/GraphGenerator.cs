@@ -19,6 +19,8 @@ class GraphGenerator
         MinimalSubgraphCount = minimalSubgraphCount;
         MinimalSubgraphSize = minimalSubgraphSize;
     }
+
+    #nullable enable
     public int[,]? GenerateGraph()
     {
         int[,] B;

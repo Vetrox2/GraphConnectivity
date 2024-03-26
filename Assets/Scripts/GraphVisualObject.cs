@@ -40,6 +40,7 @@ public class GraphVisualObject : MonoBehaviour
         joint.autoConfigureDistance = false;
         joint.distance = 2;
         joint.enableCollision = true;
+        joint.frequency = 0.6f;
         joint.connectedBody = connection.GetComponent<Rigidbody2D>();
 
         Connections.Add(new GraphVisualConnection() { gameObject = connection, lineRenderer = connectionObj.GetComponent<LineRenderer>(), joint = joint });
