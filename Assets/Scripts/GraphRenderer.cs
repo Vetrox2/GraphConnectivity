@@ -42,7 +42,7 @@ public class GraphRenderer : MonoBehaviour
             while (MenuCollider.OverlapPoint(randomPosition)) randomPosition = CameraControler.CameraControlerInstance.GetRandomPositionInCameraView();
 
             var graphVisualObject = Instantiate(GraphVisualObjectPrefab, randomPosition, Quaternion.identity, transform).GetComponent<GraphVisualObject>();
-            graphVisualObject.Index = w;
+            graphVisualObject.Index = w + 1;
             GraphVisualObjects.Add(graphVisualObject);
         }
     }

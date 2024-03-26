@@ -17,10 +17,18 @@ public class AplicationControler : MonoBehaviour
     [SerializeField]
     private Button StartButton;
     [SerializeField]
+    private Button TempGenerateButton;
+    [SerializeField]
     private GraphRenderer GraphRendererRef;
 
     void Start()
     {
+        TempGenerateButton.onClick.AddListener(() =>
+        {
+            GraphRendererRef.RemoveVisuals();
+            GraphGenerator graphGenerator = new(20, 0.15f, 2, 2);
+            GraphRendererRef.CreateVisuals(graphGenerator.GenerateGraph());
+        });
         StartButton.onClick.AddListener(() =>
         {
             GraphRendererRef.RemoveVisuals();
