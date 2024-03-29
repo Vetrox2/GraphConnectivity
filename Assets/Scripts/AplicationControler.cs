@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,7 +17,14 @@ public class AplicationControler : MonoBehaviour
     [SerializeField]
     private Button TempGenerateButton;
     [SerializeField]
+    private Button SaveRaportButton;
+    [SerializeField]
+    private Button ConnectGraphs;
+    [SerializeField]
     private GraphRenderer GraphRendererRef;
+
+    private GraphGenerator GraphGenerator;
+    private RaportGenerator RaportGenerator;
 
     void Start()
     {
@@ -35,8 +40,18 @@ public class AplicationControler : MonoBehaviour
             var vertexCount = Convert.ToInt32(VertexCountField.text);
             var minimalSubgraph = Convert.ToInt32(MinimalSubgraphField.text);
             var minimalSubgraphSize = Convert.ToInt32(MinimalSubgraphSizeField.text);
-            GraphGenerator graphGenerator = new(vertexCount, ProbabilitySlider.value, minimalSubgraph, minimalSubgraphSize);
-            GraphRendererRef.CreateVisuals(graphGenerator.GenerateGraph());
+            RaportGenerator = new RaportGenerator(Application.dataPath + @"\raport.txt");
+            GraphGenerator = new(vertexCount, ProbabilitySlider.value, minimalSubgraph, minimalSubgraphSize, RaportGenerator);
+            GraphRendererRef.CreateVisuals(GraphGenerator.GenerateGraph());
+        });
+        SaveRaportButton.onClick.AddListener(() =>
+        {
+            RaportGenerator?.SaveRaport();
+        });
+        ConnectGraphs.onClick.AddListener(() =>
+        {
+            int firstGraphVertexID, secondGraphVertexID;
+            (firstGraphVertexID, secondGraphVertexID) = GraphGenerator.ConnectGraphs();
         });
     }
 }
