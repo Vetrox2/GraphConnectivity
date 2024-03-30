@@ -20,8 +20,8 @@ public class RaportGenerator : ScriptableObject
 
     public void SaveRaport()
     {
-        File.WriteAllText(Path, Raport);
         Debug.Log(Raport);
+        File.WriteAllText(Path, Raport);
     }
 
     public void AddBasicInformationsToRaport(int[,] A, List<Edge> edges)
