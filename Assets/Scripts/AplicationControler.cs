@@ -28,11 +28,12 @@ public class AplicationControler : MonoBehaviour
 
     void Start()
     {
-        TempGenerateButton.onClick.AddListener(() =>
+        TempGenerateButton?.onClick.AddListener(() =>
         {
             GraphRendererRef.RemoveVisuals();
-            GraphGenerator graphGenerator = new(20, 0.15f, 2, 2);
-            GraphRendererRef.CreateVisuals(graphGenerator.GenerateGraph());
+            RaportGenerator = new RaportGenerator(Application.dataPath + @"\raport.txt");
+            GraphGenerator = new(20, 0.15f, 2, 2, RaportGenerator);
+            GraphRendererRef.CreateVisuals(GraphGenerator.GenerateGraph());
         });
         StartButton.onClick.AddListener(() =>
         {
@@ -50,8 +51,10 @@ public class AplicationControler : MonoBehaviour
         });
         ConnectGraphs.onClick.AddListener(() =>
         {
-            int firstGraphVertexID, secondGraphVertexID;
-            (firstGraphVertexID, secondGraphVertexID) = GraphGenerator.ConnectGraphs();
+            if (GraphGenerator == null) return;
+            var newConnection = GraphGenerator.ConnectGraphs();
+            if (newConnection == null) return;
+            GraphRendererRef.AddConnection(newConnection.Value.x, newConnection.Value.y);
         });
     }
 }

@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.IO;
+using UnityEngine;
 
-public class RaportGenerator
+public class RaportGenerator : ScriptableObject
 {
     public string Path;
 
@@ -20,6 +21,7 @@ public class RaportGenerator
     public void SaveRaport()
     {
         File.WriteAllText(Path, Raport);
+        Debug.Log(Raport);
     }
 
     public void AddBasicInformationsToRaport(int[,] A, List<Edge> edges)

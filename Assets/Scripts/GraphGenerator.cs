@@ -52,9 +52,9 @@ class GraphGenerator
 
         return A;
     }
-    public (int, int) ConnectGraphs()
+    public Vector2Int? ConnectGraphs()
     {
-        if (Graphs.Count < 2) return (-1, -1);
+        if (Graphs.Count < 2) return null;
 
         var firstGraphVertexID = Graphs[0][UnityEngine.Random.Range(0, Graphs[0].Count)];
         var secondGraphVertexID = Graphs[1][UnityEngine.Random.Range(0, Graphs[1].Count)];
@@ -68,7 +68,7 @@ class GraphGenerator
         RaportGenerator?.AddConnectedVerticesToRaport(firstGraphVertexID, secondGraphVertexID);
         RaportGenerator?.AddBasicInformationsToRaport(A, Edges);
 
-        return (firstGraphVertexID, secondGraphVertexID);
+        return new Vector2Int(firstGraphVertexID, secondGraphVertexID);
     }
 
     private bool ValidateGraphRequirements() => (Graphs.Count < MinimalSubgraphCount) || !Graphs.All(graf => graf.Count >= MinimalSubgraphSize);

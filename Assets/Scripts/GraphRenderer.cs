@@ -32,6 +32,11 @@ public class GraphRenderer : MonoBehaviour
         SetGraphConnections(graph);
     }
 
+    public void AddConnection(int index1, int index2)
+    {
+        GraphVisualObjects[index1].AddConnection(GraphVisualObjects[index2].gameObject);
+    }
+
     private void SpawnGraphVerticies(int[,] graph)
     {
         int graphWidth = graph.GetLength(0);
