@@ -8,6 +8,8 @@ public class GraphVisualObject : MonoBehaviour
 {
     [SerializeField]
     private GameObject ConnectionPrefab;
+    [SerializeField]
+    private GameObject ParticlesPrefab;
     private List<GraphVisualConnection> Connections = new();
     private bool FollowMouse = false;
     private new Collider2D collider;
@@ -71,6 +73,7 @@ public class GraphVisualObject : MonoBehaviour
     {
         if (collider.OverlapPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition)))
         {
+            if (!LightFollowMouse.Instance.Blocks.Contains(gameObject)) LightFollowMouse.Instance.Blocks.Add(gameObject);
             if (Input.GetMouseButtonDown(0))
             {
                 FollowMouse = true;
@@ -82,6 +85,7 @@ public class GraphVisualObject : MonoBehaviour
                 rigidbody.bodyType = RigidbodyType2D.Dynamic;
             }
         }
+        else if (!FollowMouse) LightFollowMouse.Instance.Blocks.Remove(gameObject);
     }
 
     public void AddConnection(GameObject connection)
@@ -98,5 +102,12 @@ public class GraphVisualObject : MonoBehaviour
         joint.connectedBody = connection.GetComponent<Rigidbody2D>();
 
         Connections.Add(new GraphVisualConnection() { gameObject = connection, lineRenderer = connectionObj.GetComponent<LineRenderer>(), joint = joint });
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        var particles = Instantiate(ParticlesPrefab, collision.contacts[0].point, transform.rotation);
+        particles.transform.parent = transform;
+        Destroy(particles.gameObject, 2);
     }
 }
