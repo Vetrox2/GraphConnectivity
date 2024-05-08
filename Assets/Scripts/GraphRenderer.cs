@@ -5,6 +5,8 @@ using UnityEngine;
 public class GraphRenderer : MonoBehaviour
 {
     [SerializeField]
+    private Collider2D MenuCollider;
+    [SerializeField]
     private GameObject GraphVisualObjectPrefab;
 
     private List<GraphVisualObject> GraphVisualObjects = new();
@@ -30,6 +32,11 @@ public class GraphRenderer : MonoBehaviour
         SetGraphConnections(graph);
     }
 
+    public void AddConnection(int index1, int index2)
+    {
+        GraphVisualObjects[index1].AddConnection(GraphVisualObjects[index2].gameObject);
+    }
+
     private void SpawnGraphVerticies(int[,] graph)
     {
         int graphWidth = graph.GetLength(0);
@@ -37,8 +44,10 @@ public class GraphRenderer : MonoBehaviour
         for (int w = 0; w < graphWidth; w++)
         {
             Vector2 randomPosition = CameraControler.CameraControlerInstance.GetRandomPositionInCameraView();
+            while (MenuCollider.OverlapPoint(randomPosition)) randomPosition = CameraControler.CameraControlerInstance.GetRandomPositionInCameraView();
+
             var graphVisualObject = Instantiate(GraphVisualObjectPrefab, randomPosition, Quaternion.identity, transform).GetComponent<GraphVisualObject>();
-            graphVisualObject.Index = w;
+            graphVisualObject.Index = w + 1;
             GraphVisualObjects.Add(graphVisualObject);
         }
     }

@@ -1,96 +1,116 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 class GraphGenerator
 {
-    int VerticlesCount = 12;
-    float EdgePossibility = 0.2f;
-    List<int> AvailableVerticles = new();
-    List<List<int>> Graphs = new();
+    private int VertexCount;
+    private float EdgePossibility;
+    private int MinimalSubgraphCount;
+    private int MinimalSubgraphSize;
+    private List<int> AvailableVerticles = new();
+    private List<List<int>> Graphs = new();
+    private List<Edge> Edges = new();
+    private int[,] A;
+    private RaportGenerator RaportGenerator;
 
-    //Move commented logic to other functions!
-    public int[,] GenerateGraph()
+    public GraphGenerator(int vertexCount, float edgePossibility, int minimalSubgraphCount, int minimalSubgraphSize, RaportGenerator raportGenerator = null)
     {
-
-
-        //do
-        //{
-            Graphs.Clear();
-            Console.Clear();
-            int[,] A = new int[VerticlesCount, VerticlesCount];
-            for (int i = 0; i < VerticlesCount; i++)
-                AvailableVerticles.Add(i);
-            for (int i = 0; i < VerticlesCount - 1; i++)
-            {
-                for (int j = i + 1; j < VerticlesCount; j++)
-                {
-                    Random r = new();
-                    double x = r.NextDouble();
-                    if (x < EdgePossibility)
-                    {
-                        A[i, j] = 1;
-                        A[j, i] = 1;
-                    }
-                }
-
-            }
-            return A;
-            //WypiszMacierz(A);
-        //    do
-        //    {
-        //        var graf1 = new List<int>();
-        //        Wszerz(AvailableVerticles[0], VerticlesCount, A, graf1);
-        //        WypiszGraf(graf1);
-        //        graf1.ForEach(x => AvailableVerticles.Remove(x));
-        //        Graphs.Add(graf1);
-        //    }
-        //    while (AvailableVerticles.Count > 0);
-        //}
-        //while ((Graphs.Count < 3 || Graphs.Count > 5) || !Graphs.All(graf => graf.Count > 1));
+        VertexCount = vertexCount;
+        EdgePossibility = edgePossibility;
+        MinimalSubgraphCount = minimalSubgraphCount;
+        MinimalSubgraphSize = minimalSubgraphSize;
+        RaportGenerator = raportGenerator;
     }
 
-
-    void WypiszMacierz(int[,] A)
+#nullable enable
+    public int[,]? GenerateGraph()
     {
-        Console.Write("   ");
-        for (int i = 0; i < VerticlesCount; i++)
-            Console.Write(i + 1 + " ");
+        int iterations = 0;
 
-        Console.WriteLine();
-        for (int i = 0; i < VerticlesCount; i++)
+        do
         {
-            Console.Write(i + 1 + ": ");
-            for (int j = 0; j < VerticlesCount; j++)
-                if (i != j)
-                    Console.Write(A[i, j] + " ");
-                else
-                    Console.Write("X ");
+            Graphs.Clear();
+            Edges.Clear();
+            AvailableVerticles.Clear();
+            iterations++;
+            if (iterations > 1000)
+            {
+                Debug.LogError("Exceeded generator iterations limit (more than 1000 iterations)");
+                A = null;
+                return null;
+            }
 
-            Console.WriteLine();
+            AvailableVerticles.AddRange(Enumerable.Range(0, VertexCount));
+            A = GenerateMatrix();
+            BreadthFirstSearch(A);
         }
-        Console.WriteLine();
-    }
+        while (ValidateGraphRequirements());
 
-    void WypiszGraf(List<int> graf)
+        RaportGenerator?.InitializeRaport(iterations, EdgePossibility);
+        RaportGenerator?.AddBasicInformationsToRaport(A, Edges);
+
+        return A;
+    }
+    public Vector2Int? ConnectGraphs()
     {
-        Console.WriteLine("Graf: ");
-        graf.ForEach(x => Console.Write(x + 1 + " "));
-        Console.WriteLine();
+        if (Graphs.Count < 2) return null;
+
+        var firstGraphVertexID = Graphs[0][UnityEngine.Random.Range(0, Graphs[0].Count)];
+        var secondGraphVertexID = Graphs[1][UnityEngine.Random.Range(0, Graphs[1].Count)];
+
+        Edges.Add(new Edge { V1 = firstGraphVertexID, V2 = secondGraphVertexID });
+        A[firstGraphVertexID, secondGraphVertexID] = 1;
+        A[secondGraphVertexID, firstGraphVertexID] = 1;
+        Graphs[0].AddRange(Graphs[1]);
+        Graphs.RemoveAt(1);
+
+        RaportGenerator?.AddConnectedVerticesToRaport(firstGraphVertexID, secondGraphVertexID);
+        RaportGenerator?.AddBasicInformationsToRaport(A, Edges);
+
+        return new Vector2Int(firstGraphVertexID, secondGraphVertexID);
     }
 
-    void Wszerz(int i, int n, int[,] A, List<int> graf)
+    private bool ValidateGraphRequirements() => (Graphs.Count < MinimalSubgraphCount) || !Graphs.All(graf => graf.Count >= MinimalSubgraphSize);
+
+    private int[,] GenerateMatrix()
+    {
+        int[,] A = new int[VertexCount, VertexCount];
+        for (int i = 0; i < VertexCount - 1; i++)
+        {
+            for (int j = i + 1; j < VertexCount; j++)
+            {
+                float randomValue = UnityEngine.Random.Range(0.0f, 1f);
+                if (randomValue < EdgePossibility)
+                {
+                    A[i, j] = 1;
+                    A[j, i] = 1;
+                }
+            }
+        }
+        return A;
+    }
+
+    private void BreadthFirstSearch(int[,] A)
+    {
+        do
+        {
+            var subgraph = new List<int>();
+            FindSubgraph(AvailableVerticles[0], VertexCount, A, subgraph);
+            subgraph.ForEach(x => AvailableVerticles.Remove(x));
+            Graphs.Add(subgraph);
+        }
+        while (AvailableVerticles.Count > 0);
+    }
+
+    private void FindSubgraph(int i, int n, int[,] A, List<int> graf)
     {
         graf.Add(i);
         for (int j = 0; j < n; j++)
-        {
             if (A[i, j] == 1 && !graf.Any(w => w == j))
             {
-                A[i, j] = 0;
-                A[j, i] = 0;
-                Wszerz(j, n, A, graf);
+                Edges.Add(new Edge { V1 = i, V2 = j });
+                FindSubgraph(j, n, A, graf);
             }
-
-        }
     }
 }
